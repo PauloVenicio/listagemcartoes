@@ -107,7 +107,10 @@ tr{break-inside:avoid}
 <input id="person1" maxlength="95" value="LEONARDO DANIEL DA CUNHA F145297">
 </label>
 <label class="full">Responsável / matrícula — segunda linha
-<input id="person2" maxlength="95" value="MARTA MARIA RAMALHO BEZERRA DUARTE A204133">
+<select id="person2">
+<option value="ALACIDE SANTOS COSTA" selected>ALACIDE SANTOS COSTA</option>
+<option value="MARTA MARIA RAMALHO BEZERRA DUARTE A204133">MARTA MARIA RAMALHO BEZERRA DUARTE A204133</option>
+</select>
 </label>
 <label class="full">Texto do termo
 <textarea id="term" maxlength="420">Confirmo a transferência da guarda dos Cartões de Débito de clientes do Crediamigo, conforme Lista de Cartões/Planilha em anexo, conferida e rubricada nesta data.</textarea>
@@ -236,7 +239,16 @@ function load(){
         .map(c=>({account:c.account.slice(0,25),name:c.name.slice(0,100).toLocaleUpperCase('pt-BR'),cardType:normalizeCardType(c.cardType)}));
     }
     fields.forEach(id=>{
-      if(typeof data.fields?.[id]==='string')$(id).value=data.fields[id];
+      if(typeof data.fields?.[id]==='string'){
+        const value=data.fields[id];
+        // Preserva responsáveis de rascunhos anteriores, inclusive a segunda linha vazia.
+        if(id==='person2'&&![...$(id).options].some(option=>option.value===value)){
+          const option=element('option',value||'Sem segundo responsável');
+          option.value=value;
+          $(id).append(option);
+        }
+        $(id).value=value;
+      }
     });
     if(data.draft&&typeof data.draft==='object'){
       if(typeof data.draft.account==='string')$('account').value=data.draft.account.slice(0,25);
