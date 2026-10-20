@@ -130,11 +130,11 @@ tr{break-inside:avoid}
 </label>
 <label>Tipo de cartão
 <select id="cardType" required>
+<option value="AGROAMIGO" selected>AGROAMIGO</option>
 <option value="CREDIAMIGO">CREDIAMIGO</option>
-<option value="AGROAMIGO">AGROAMIGO</option>
-<option value="PJ">PJ</option>
-<option value="PF">PF</option>
 <option value="INSS">INSS</option>
+<option value="PF">PF</option>
+<option value="PJ">PJ</option>
 <option value="PRONAF">PRONAF</option>
 </select>
 </label>
@@ -184,7 +184,7 @@ tr{break-inside:avoid}
 'use strict';
 const $=id=>document.getElementById(id);
 const key='credimigo-listagem-v1';
-const cardTypes=['CREDIAMIGO','AGROAMIGO','PJ','PF','INSS','PRONAF'];
+const cardTypes=['AGROAMIGO','CREDIAMIGO','INSS','PF','PJ','PRONAF'];
 function normalizeCardType(value){
   const normalized=typeof value==='string'?value.trim().toLocaleUpperCase('pt-BR'):'';
   if(normalized==='AGRL')return 'AGROAMIGO';
@@ -253,7 +253,7 @@ function load(){
     if(data.draft&&typeof data.draft==='object'){
       if(typeof data.draft.account==='string')$('account').value=data.draft.account.slice(0,25);
       if(typeof data.draft.name==='string')$('clientName').value=data.draft.name.slice(0,100).toLocaleUpperCase('pt-BR');
-      $('cardType').value=normalizeCardType(data.draft.cardType);
+      $('cardType').value=data.draft.cardType?normalizeCardType(data.draft.cardType):cardTypes[0];
       const index=data.draft.editing;
       // Só restaura a edição se a lista original permaneceu válida e na mesma ordem.
       if(Number.isInteger(index)&&index>=0&&index<clients.length&&clients.length===data.clients.length){
