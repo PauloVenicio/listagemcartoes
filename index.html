@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listagem de Cartões — Crediamigo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f2f3;color:#202834;font-family:Arial,sans-serif}
+header{background:#a6193c;color:white;padding:25px 20px;border-bottom:4px solid #f68b1f}
+header>div,main{max-width:1100px;margin:auto}
+.brand-header{display:flex;align-items:center;gap:28px}
+.bank-logo{display:block;width:220px;height:auto;background:white;padding:12px;border-radius:8px;flex-shrink:0}
+h1{font-size:25px;margin:0 0 8px}
+header p{margin:0;color:#f5e3e6;font-size:14px;line-height:1.5}
+main{padding:20px}
+.card{background:white;border:1px solid #dce2e8;border-radius:12px;padding:22px;margin-bottom:18px}
+h2{font-size:18px;margin:0 0 18px;color:#a6193c}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:bold}
+input,textarea,select{display:block;width:100%;padding:11px;margin-top:6px;border:1px solid #bfc8d2;border-radius:6px;font:inherit;background:white;color:#202834}
+textarea{min-height:85px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid #a6193c;outline-offset:1px}
+button:focus-visible{outline:3px solid #f68b1f;outline-offset:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+button{border:0;border-radius:6px;background:#a6193c;color:white;padding:12px 17px;font:inherit;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(.93)}
+.secondary{background:#f3e7e9;color:#76222e}
+.danger{background:#fff0f0;color:#a32a2a}
+.small{padding:7px 10px;font-size:12px;margin:3px}
+.muted{font-size:13px;color:#5f6b78;line-height:1.5}
+#status{min-height:20px}
+.scroll{overflow:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #e1e5eb;font-size:14px}
+th{background:#f3f5f8}
+td:last-child{white-space:nowrap}
+.empty{text-align:center;color:#677483;padding:25px}
+.count{float:right;color:#a6193c}
+#preview{display:none;margin:25px auto;max-width:210mm}
+body.show-preview #preview{display:block}
+.sheet{position:relative;background:white;color:#111;width:210mm;min-height:297mm;padding:12mm 10mm 20mm;margin:0 auto 20px;box-shadow:0 3px 15px #0002;font-family:Arial,sans-serif}
+.term{font-family:Georgia,serif;font-size:12pt;font-weight:bold;line-height:1.45;margin:0 0 15mm;white-space:pre-wrap;overflow-wrap:anywhere}
+.details{font-size:11pt;line-height:1.7}
+.received{text-align:right;margin-top:3mm;margin-right:15mm;font-size:11pt}
+.signatures{display:flex;justify-content:space-between;gap:25mm;margin:28mm 0 7mm;text-align:center;font-size:11pt}
+.signatures div{width:42%;border-top:1px solid #999;padding-top:2mm}
+.sheet h3{text-align:center;font-size:12pt;margin:0 0 2mm}
+.sheet table{table-layout:fixed}
+.sheet th{background:#ddd;font-weight:normal}
+.sheet th,.sheet td{padding:1.25mm 2mm;border:0;font-size:10pt;line-height:1.15;overflow-wrap:anywhere;white-space:normal}
+.sheet th:first-child{width:34mm}
+.sheet th:last-child{width:28mm}
+.total{border-top:1px solid #999;margin-top:2mm;padding-top:2mm;font-size:10pt}
+.footer{position:absolute;bottom:8mm;left:10mm;right:10mm;border-top:1px solid #ddd;padding-top:2mm;text-align:right;font-size:9pt;color:#666}
+@media(max-width:650px){
+.brand-header{flex-direction:column;align-items:flex-start;gap:18px}
+.bank-logo{width:190px;max-width:100%}
+.grid{grid-template-columns:1fr}
+.card{padding:16px}
+main{padding:12px}
+h1{font-size:21px}
+#preview{overflow:auto;padding-bottom:10px}
+.sheet{margin-left:0}
+}
+@page{size:A4 portrait;margin:0}
+@media print{
+html,body{margin:0!important;background:white}
+.no-print{display:none!important}
+#preview,body.show-preview #preview{display:block!important;margin:0;max-width:none;overflow:visible;padding:0}
+.sheet{width:210mm;height:297mm;min-height:0;margin:0;box-shadow:none;break-after:page;page-break-after:always}
+.sheet:last-child{break-after:auto;page-break-after:auto}
+.sheet th{background:#ddd!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="no-print"><div class="brand-header">
+<img class="bank-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgaWQ9ImFzdmcyNTciIHdpZHRoPSIyNzYiIGhlaWdodD0iMTI4IiB2aWV3Qm94PSIwIDAgMjc2IDEyOCI+PHN0eWxlIHR5cGU9InRleHQvY3NzIiBpZD0iYXN0eWxlMjE3Ij4uYXN0MCwuYXN0MXtmaWxsLXJ1bGU6ZXZlbm9kZDtjbGlwLXJ1bGU6ZXZlbm9kZDtmaWxsOiNmNjhiMWZ9LmFzdDF7ZmlsbDojYTYxOTNjfTwvc3R5bGU+PHBhdGggaWQ9ImFwYXRoMjE5IiBkPSJNMzMuNDcyIDI1LjQ5aDQ4LjgxYzcuNzY2IDAgMTQuMDc1IDYuMzcxIDE0LjA3NSAxNC4xOTh2NDguNjkzYzAgNy43NTgtNi4zNzggMTQuMTMtMTQuMDc0IDE0LjEzaC00My42MXYtNi40NDJoNDMuMTk0YzQuNjQ1IDAgOC4xMTItMy41MzIgOC4xMTItOC4wMzR2LTQ4YzAtNC42NDEtMy40NjctOC4xMDQtOC4xMTItOC4xMDRIMzMuODE5Yy00LjY0NiAwLTguMTEyIDMuNTMyLTguMTEyIDguMTA0djI4LjQ2N2MtMi4xNSAxLjk0LTQuMzY4IDMuOTQ4LTYuMTAyIDYuMjM0LS4wNjkuMTM4LS4yMDguMjc3LS4yNzcuMzQ2VjM5LjY4OGMwLTcuODI3IDYuMzc5LTE0LjE5OSAxNC4xNDQtMTQuMTk5eiIgY2xhc3M9ImFzdDAiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2Y2OGIxZiIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2Utd2lkdGg9Ii42OTMiLz48cGF0aCBpZD0iYXBhdGgyMjEiIGQ9Ik0zMC41NiAzNi43OGMxNC4wMDUuNjIzIDI3LjExIDEyLjUzNiAyNy4zMTcgMjYuODc0LjE0LTE1LjY1NCAxNC43LTI2LjQ2IDI3LjI0OC0yNi45NDR2MTcuOGMtOS4wODIuMjc4LTIwLjI0NS0uMDY4LTI3LjMxNyA5LjQ5LTMwLjAyMSAwLTQ3LjE0NyAyNy4yOS00NC45MjggNTEuMzI1aDE5LjI3NUMyOS4zOCA5NiAzNi43MyA3MC4wOTUgNTcuODA4IDY0YzE1LjYgMCAyNi40ODUgMTQuNzUzIDI3LjMxNyAyNy4yMkg2Ny4zNzZjLS4yNzctOS44MzUtLjYyNC0yMC43NzgtOS41NjgtMjcuMjItNi43OTUtOS4yODEtMTcuMDU2LTkuMTQzLTI3LjI0OC05LjQyeiIgY2xhc3M9ImFzdDEiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2E2MTkzYyIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2Utd2lkdGg9Ii42OTMiLz48cGF0aCBpZD0iYXBhdGgyMjUiIGQ9Ik0xODIuMjYxIDgwLjEzOWMtLjI3Ny0uMDctLjgzMi0uMjA4LTEuMjQ4LS4yMDgtMS45NCAwLTMuNTM2LjYyMy00LjM2OCAyLjQ5My0uMjc3LjU1NC0uNDg1IDEuNDU1LS41NTQgMi4wNzgtLjEzOSAxLjEwOC0uMDcgMi40OTQuMjc3IDMuNjAyLjkwMSAyLjE0NyAzLjY3NSAzLjE4NiA1LjgyNCAyLjI4NlY4MC4xMzl6bTMuMTktMTMuMjNjMS4xMSAwIDIuMDguMTM5IDMuMTkuMjc3djI3LjU2N2MtMS4zMTguNDE2LTIuNjM2Ljc2Mi00LjAyMi45LTEuNTI2LjIwOC0yLjk4Mi4yNzgtNC41MDcuMjc4LTIuNTY1IDAtNS40MDgtLjY5My03LjM1LTIuNDI1LTIuODQyLTIuMzU0LTMuNjc0LTYuNTgtMi45OC0xMC4xMTIuMjc3LTEuMzg1LjY5My0yLjcwMSAxLjM4Ni0zLjk0OGExMC4wNzEgMTAuMDcxIDAgMDEyLjc3My0yLjkxYzEuMTgtLjc2MSAyLjQ5Ni0xLjM4NCAzLjg4My0xLjY2MmExMS42OTkgMTEuNjk5IDAgMDEyLjI4OC0uMjA3Yy43NjMgMCAxLjQ1Ni4wNjkgMi4yMTkuMjA3aC4wNjl2LTcuNjg4Yy45MDEtLjA3IDEuOTQxLS4yNzcgMy4wNS0uMjc3eiIgY2xhc3M9ImFzdDEiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2E2MTkzYyIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2Utd2lkdGg9Ii42OTMiLz48cGF0aCBpZD0iYXBhdGgyMjciIGQ9Ik0xNDEuNjMyIDUxLjUzMmwtLjIwOC0uMDY5Yy0xLjM4Ny0uMDctMi43NzMtLjI3Ny00LjE2LjA3LTEuMzg3LjM0Ni0yLjM1NyAxLjI0Ni0yLjM1NyAyLjc3IDAgMS4xNzguNTU0IDIuMjE2IDEuNzMzIDIuNDk0IDEuNTk1LjYyMyAzLjM5Ny4zNDYgNC45OTItLjA3em0wLTQuMTU1YzAtLjY5My0uMDctMS4yNDctLjI3Ny0xLjczMmEzLjQ3NyAzLjQ3NyAwIDAwLS42OTQtLjk3Yy0uMzQ2LS4yNzctLjY5My0uNDg1LTEuMjQ4LS41NTQtLjQ4NS0uMTM4LTEuMTA5LS4yMDgtMS44MDItLjIwOC0xLjE3OSAwLTIuMzU4LjEzOS0zLjUzNi40MTYtLjM0Ny4wNy0uNjk0LjIwOC0xLjExLjM0NmwtLjQxNi4xMzktLjIwOC0uMzQ2Yy0uNTU0LS45Ny0uODMyLTIuMTQ4LS44MzItMy4yNTZ2LS40MTVjLjE0LS4wNy4yMDgtLjA3LjM0Ny0uMTM5IDEuNDU2LS40MTYgMy4wNS0uODMxIDQuNTc2LS44MzEgMS4zODctLjA3IDMuMzI4LS4wNyA1LjA2MS40MTUgMS4wNC4zNDcgMS45NDIuODMyIDIuNjM1IDEuNDU1LjY5My42MjMgMS4yNDggMS40NTUgMS41OTUgMi40OTMuMzQ2Ljk3LjU1NCAyLjE0OC41NTQgMy40NjRWNjAuMjZjLS42MjQuMTM4LTEuMzE3LjI3Ny0xLjk0LjQxNS0xLjI0OS4yMDgtMi40OTcuNDg1LTMuNzQ1LjU1NC0yLjQyNy4xMzktNC43MTUuMDctNy4wMDMtLjc2MS0uODMyLS4zNDctMS42NjQtLjk3LTIuMjg4LTEuNjYzYTcuMjIgNy4yMiAwIDAxLTEuMzg2LTQuMjk0YzAtLjk3LjI3Ny0yLjIxNy43NjItMy4wNDguNjk0LTEuMzg1IDEuOTQyLTIuNDI0IDMuMjYtMy4wNDcgMi4wMS0xLjA0IDQuNjQ0LTEuMDQgNi43OTQtLjkuMjc3IDAgLjQ4NSAwIC42OTMuMDY4aC4wN3YtLjIwN3oiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjI5IiBkPSJNMjAzLjgyNCA4Mi43N2MtLjA3LS4yNzYtLjEzOS0uNTU0LS4yMDgtLjlhMi44OSAyLjg5IDAgMDAtMi43NzMtMi4wMDljLS45MDIgMC0xLjgwMy4yNzgtMi40MjcuOS0uNjI0LjYyNC0uNzYzIDEuMzE3LS45NyAyLjA3OWg2LjM3OHptLTYuNTE3IDQuNzhjLjA2OS40MTUuMTM4Ljc2Mi4zNDYgMS4xMDguNTU1Ljk3IDEuMzg3IDEuNDU1IDIuNDI3IDEuOC41NTUuMTQgMS4zODcuMjc4IDEuOTQxLjI3OCAxLjk0MiAwIDMuNTM2LS40ODUgNS40MDgtMS4wMzkuNDE2LjY5My43NjMgMS41MjQuOTcxIDIuMjg2LjIwOC45Ny4zNDcgMS44LjM0NyAyLjc3YTE5LjQ3MiAxOS40NzIgMCAwMS03LjE0MiAxLjMxNmMtMS41OTQgMC0zLjMyOC0uMjA4LTQuODUzLS44My0zLjI1OS0xLjI0OC01LjI3LTQuMTU3LTUuNzU1LTcuNTUtLjM0Ni0yLjAxLS4xMzgtNC40MzQuNDg2LTYuMzczLjYyNC0xLjk0IDEuNzMzLTMuNTMyIDMuMzI4LTQuNzggMS43MzMtMS4zMTUgMy44ODItMS44NyA2LjAzMi0xLjg3IDEuOTQxIDAgMy44MTMuNDg2IDUuNDA4IDEuNjYzIDEuNDU2IDEuMTA4IDIuNDk2IDIuNTYzIDMuMTIgNC4zNjQuNDg1IDEuNTIzLjU1NCAyLjk3OC41NTQgNC41NzEgMCAuNzYyLS4xMzggMS41MjQtLjI3NyAyLjI4NnoiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjMxIiBkPSJNMjU3LjE0MSA4Mi43N2MtLjA2OS0uMjc2LS4xMzgtLjU1NC0uMjA4LS45YTIuODkgMi44OSAwIDAwLTIuNzczLTIuMDA5Yy0uOTAxIDAtMS44MDMuMjc4LTIuNDI3LjktLjYyNC42MjQtLjc2MiAxLjMxNy0uOTcgMi4wNzloNi4zNzh6bS02LjQ0OCA0Ljc4Yy4wNy40MTUuMTQuNzYyLjM0NyAxLjEwOC41NTUuOTcgMS4zODcgMS40NTUgMi40MjcgMS44LjU1NC4xNCAxLjM4Ni4yNzggMS45NDEuMjc4IDEuOTQxIDAgMy41MzYtLjQ4NSA1LjQwOC0xLjAzOS40MTYuNjkzLjc2MyAxLjUyNC45NyAyLjI4Ni4yMDkuOTcuMzQ3IDEuOC4zNDcgMi43N2ExOS40NzIgMTkuNDcyIDAgMDEtNy4xNCAxLjMxNmMtMS41OTYgMC0zLjMyOS0uMjA4LTQuODU0LS44My0zLjI1OS0xLjI0OC01LjI3LTQuMTU3LTUuNzU1LTcuNTUtLjM0Ny0yLjAxLS4xMzktNC40MzQuNDg1LTYuMzczLjYyNC0xLjk0IDEuNzM0LTMuNTMyIDMuMzI4LTQuNzggMS43MzQtMS4zMTUgMy44ODMtMS44NyA2LjAzMi0xLjg3IDEuOTQyIDAgMy44MTQuNDg2IDUuNDA4IDEuNjYzIDEuNDU2IDEuMTA4IDIuNDk2IDIuNTYzIDMuMTIgNC4zNjQuNDg2IDEuNTIzLjU1NSAyLjk3OC41NTUgNC41NzEgMCAuNzYyLS4xMzkgMS41MjQtLjI3NyAyLjI4NnoiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjMzIiBkPSJNMTQyLjI1NiA5MC44NzRjLjYyNCAwIDEuMTc5LS4wNjkgMS41OTUtLjI3NyAxLjY2NC0uOSAxLjgwMi0zLjQ2MyAxLjgwMi01LjEyNSAwLS45LS4wNjktMS43MzItLjIwOC0yLjQ5NC0uMzQ2LTEuOC0xLjI0OC0yLjk3OC0zLjE4OS0yLjk3OC0xLjg3MiAwLTIuNzczIDEuMjQ3LTMuMTIgMi45NzgtLjEzOS42OTMtLjIwOCAxLjUyNC0uMjA4IDIuNDk0IDAgMS41OTMuMTM5IDQuMjk0IDEuODcyIDUuMTI1LjQxNi4yMDggMS4wNC4yNzcgMS40NTYuMjc3em0wIDUuMTI2Yy0xLjY2NCAwLTMuMTItLjI3Ny00LjI5OS0uODMxLTEuMTc4LS41NTQtMi4yMTgtMS4yNDctMy4wNS0yLjIxN2E4LjkxOCA4LjkxOCAwIDAxLTEuODAzLTMuMzk0Yy0uNDg1LTEuMzE2LS42MjQtMi42MzItLjYyNC00LjA4NiAwLTIuMDA5LjM0Ny00LjIyNSAxLjM4Ny01Ljk1Ny42MjQtMS4xMDggMS4zODYtMi4xNDcgMi40MjYtMi45MDkgMS43MzQtMS4zMTYgMy44MTQtMS44IDUuOTYzLTEuOCAyLjE1IDAgNC4yOTkuNDg0IDYuMDMyIDEuOCAxLjUyNSAxLjE3OCAyLjcwNCAyLjg0IDMuMTkgNC43MS40MTUgMS4zMTYuNTU0IDIuNzcuNTU0IDQuMTU2IDAgMS4zODUtLjEzOSAyLjc3LS41NTUgNC4wODYtLjM0NiAxLjI0Ny0xLjA0IDIuNDI1LTEuODAyIDMuMzk0LS45MDIuOTctMS45NDIgMS43MzItMy4xMiAyLjIxNy0xLjMxOC41NTQtMi44NDMuODMxLTQuMjk5LjgzMXoiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjM1IiBkPSJNMTE4LjQ3NSA0My40OThjLjU1NC0uMTM5IDEuMTEtLjQxNiAxLjQ1Ni0uNjkzLjgzMi0uNzYyIDEuMTc4LTEuODcgMS4xNzgtMi45NzggMC0uNjI0LS4wNjktMS4xNzgtLjM0Ni0xLjY2My0uNDg2LS45Ny0xLjY2NC0xLjY2Mi0yLjQ5Ni0xLjgtLjk3LS4yMDgtMS44NzItLjI3Ny0yLjg0My0uMjc3LS40MTYgMC0uOTAxLjA2OS0xLjMxNy4wNjloLS4wN3Y3LjYxOWMxLjQ1Ni0uMDcgMy4wNTEuMDcgNC40MzgtLjI3N3ptLTQuMzY4IDEzLjE2Yy43NjIuMDcgMS41OTQuMDcgMi40MjYuMDcuNjI0IDAgMS44NzItLjE0IDIuNDk2LS4yMDkgMS4zMTgtLjI3NyAyLjQ5Ni0uNzYxIDMuMjYtMi4wMDguMzQ2LS41NTQuNDE1LTEuMzg1LjQxNS0yLjAwOSAwLTEuNzMxLS44MzItMy4yNTUtMi40OTYtMy45NDgtLjk3LS40MTUtMi4zNTctLjU1NC0zLjQ2Ny0uNTU0aC0yLjYzNHptLTMuMzI4LTI0LjQ1YzIuMzU3LS4yMDggNC43ODQtLjQxNiA3LjE0MS0uMjA4IDEuMjQ4LjEzOSAyLjU2NS4zNDYgMy43NDQuODMxIDEuNTk1LjY5MyAyLjg0MyAxLjY2MiAzLjYwNSAzLjE4Ni40MTYuNzYyLjc2MyAyLjE0Ny43NjMgMy41MzMgMCAxLjUyNC0uNDE2IDMuMTE3LTEuNDU2IDQuMjk0LS40ODUuNTU0LS45MDEuOTctMS41MjUgMS4zODUtLjA3LjA3LS4xMzkuMDctLjIwOC4xMzkuNjI0LjI3NyAxLjE3OC40ODUgMS43MzMuODMxIDEuMTc5Ljc2MiAyLjAxIDEuODAxIDIuNTY1IDMuMTE3LjQxNi45Ny42MjQgMi4yMTYuNjI0IDMuMzI1IDAgMS4yNDYtLjI3NyAyLjc3LS45NyAzLjg3OC0uNjk0IDEuMTc4LTEuNDU2IDEuOTQtMi41NjYgMi43MDItMi4yODggMS41MjQtNS40NzcgMS44Ny04LjE4IDEuODctMi4zNTggMC00LjU3Ny0uMjc3LTYuOTM0LS41NTRWMzIuNDg1Yy42MjQtLjEzOSAxLjExLS4yNzcgMS42NjQtLjI3N3oiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjM3IiBkPSJNMTUzLjI4IDQwLjAzNWMuNjkzIDAgMS4zMTcuMTM4IDIuMDEuMjA3bC4wNy4zNDdjLjA3LjQxNS4yMDguOS4yMDggMS41OTNsLjA3LjIwOC4xMzgtLjEzOS42OTMtLjY5M2MuNjI0LS42MjMgMS44MDMtMS4yNDYgMi42MzUtMS40NTQuNjkzLS4yNzcgMS41OTUtLjM0NiAyLjM1Ny0uMzQ2IDIuMDExIDAgNC4wMjIuNTU0IDUuNDA4IDIuMDc3LjU1NS42OTMuOTcxIDEuNTk0IDEuMzE4IDIuNjMzLjI3Ny45Ny40MTYgMi4xNDcuNDE2IDMuNDYzdjEyLjY3NWMtLjgzMi4xMzktMS41OTUuMjc3LTIuNDI3LjI3Ny0uODMyIDAtMS41OTUtLjEzOC0yLjQyNy0uMjc3VjQ4LjljMC0xLjMxNi0uMDY5LTMuODc4LTEuNTk0LTQuNDMyLS45NzEtLjQ4NS0yLjIxOS0uMjc4LTMuMTIuMDY5LTIuMjg4Ljk3LTIuOTgyIDMuNTMyLTIuOTgyIDUuODE4djEwLjE4MmMtLjc2Mi4xMzgtMS41OTQuMjc3LTIuMzU3LjI3Ny0uODMyIDAtMS42NjQtLjA3LTIuNDk2LS4yNzdWNDAuMjQyYy42MjQtLjA2OSAxLjMxNy0uMjA3IDIuMDgtLjIwN3oiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjM5IiBkPSJNMTg3LjY3IDU3LjkwNWMuMjA3LjY5Mi4yMDcgMS40NTQuMzQ2IDIuMTQ3LS4xMzkuMDctLjIwOC4wNy0uMzQ3LjEzOC0xLjczMy42OTMtMy40NjYuOTctNS4zMzguOTctNC4zNjggMC04LjE4Mi0xLjk0LTkuNzA3LTYuMzcyLS40MTYtMS4yNDctLjYyNC0yLjcwMS0uNjI0LTQuMjk0IDAtMi4wNzguNDE2LTQuMTU2IDEuNDU2LTYuMDI2LjkwMS0xLjczMiAyLjQ5Ni0zLjE4NyA0LjI5OS0zLjg4YTkuNjkyIDkuNjkyIDAgMDEyLjAxLS42MjNjMS43MzQtLjM0NiAzLjUzNi0uMjc3IDUuMjcgMCAuOTcuMTM5IDEuODcyLjQxNiAyLjcwNC43NjIgMCAuNjI0IDAgMS4zMTYtLjIwOCAxLjk0LS4wNy42OTItLjQxNiAxLjM4NS0uNjk0IDIuMDc4YTEzLjA5NiAxMy4wOTYgMCAwMC0yLjM1Ny0uNjI0Yy0xLjQ1Ni0uMjA4LTMuMTktLjM0Ni00LjUwNy4yNzctMS4zODYuNjI0LTIuMTQ5IDEuOTQtMi41NjUgMy4zMjVhMTEuMDcyIDExLjA3MiAwIDAwLS4zNDcgMi43MDFjMCAxLjE3OC4xNCAyLjIxNy40MTYgMi45NzkuNzYzIDIuNDI0IDIuODQzIDMuMzk0IDUuMiAzLjM5NCAxLjQ1NiAwIDIuOTEyLS4yNzggNC4zLS44MzIuMjA3LjY5My40ODQgMS4yNDcuNjkyIDEuOTR6IiBjbGFzcz0iYXN0MSIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjYTYxOTNjIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS13aWR0aD0iLjY5MyIvPjxwYXRoIGlkPSJhcGF0aDI0MSIgZD0iTTE5OS42NjQgNTcuMDA0YzEuMTc5IDAgMi43MDQtLjQ4NSAzLjQ2Ny0xLjY2Mi43NjItMS4xMDggMS4xNzgtMi43NyAxLjE3OC00LjkxOCAwLTIuMTQ3LS40MTYtMy44NzktMS4xNzgtNC45ODctLjc2My0xLjEwOC0xLjg3Mi0xLjU5My0zLjQ2Ny0xLjU5My0xLjUyNSAwLTIuODQzLjc2Mi0zLjM5NyAxLjU5My0uOTcgMS40NTUtMS4xMSAzLjI1Ni0xLjExIDQuOTg3IDAgMS43MzIuMTQgMy40NjMgMS4xMSA0LjkxOC43NjIgMS4xNzcgMi4wOCAxLjY2MiAzLjM5NyAxLjY2MnptMCA0LjA4N2MtMS40NTYgMC0yLjkxMi0uMjc3LTQuMjMtLjgzMS0xLjE3OC0uNDg1LTIuMjE4LTEuMzE2LTMuMDUtMi4yODYtLjgzMi0uOTctMS4zODctMi4yMTYtMS44MDMtMy4zOTQtLjQxNi0xLjMxNi0uNTU0LTIuNzctLjU1NC00LjA4NiAwLTEuMzg2LjEzOC0yLjg0LjU1NC00LjE1Ni4zNDctMS4xNzguOTcxLTIuNDk0IDEuODAzLTMuMzk0LjkwMS0uOTcgMS44MDMtMS44MDEgMy4wNS0yLjM1NWExMC45NjIgMTAuOTYyIDAgMDE0LjIzLS44MzFjMS40NTYgMCAyLjkxMi4yNzcgNC4yMy44MyAyLjQyNiAxLjEwOSA0LjAyIDMuMTg3IDQuODUzIDUuNzUuNDE2IDEuMzg1LjU1NCAyLjc3LjU1NCA0LjE1NSAwIC43NjItLjA2OSAxLjUyNC0uMTM4IDIuMjE3LS4xMzkgMS4yNDctLjU1NSAyLjYzMi0xLjE3OSAzLjc0YTguMDQzIDguMDQzIDAgMDEtMi40MjcgMi44NGMtMS4xMDkuNzYyLTIuMzU3IDEuMzg1LTMuNjc0IDEuNTkzLS42OTQuMTM5LTEuNDU2LjIwOC0yLjIxOS4yMDh6IiBjbGFzcz0iYXN0MSIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjYTYxOTNjIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS13aWR0aD0iLjY5MyIvPjxwYXRoIGlkPSJhcGF0aDI0MyIgZD0iTTIxNS41NDEgODYuMzcyYy0yLjA4LTEuMDM5LTIuOTEyLTIuODQtMi45MTItNS4wNTYuMDctMy4wNDggMS45NDItNS4yNjQgNC44NTQtNi4yMzQgMS41MjUtLjQxNSAzLjI1OC0uNDg1IDQuODUzLS4zNDYgMS41OTUuMTM4IDMuMzI4LjU1NCA0Ljg1MyAxLjE3NyAwIC45LS4xMzggMS43MzItLjQxNiAyLjU2My0uMjc3LjgzMS0uNTU0IDEuNTkzLS45NyAyLjM1NS0xLjExLS40MTUtMi40OTYtLjktMy40NjctMS4wMzktLjgzMi0uMTM4LTIuMDgtLjEzOC0yLjg0My4yNzctLjI3Ny4yMDgtLjQxNi40MTYtLjQxNi44MzEgMCAuNTU1LjM0Ny43NjIuODMyIDEuMDQuMjc4LjA2OS40ODYuMjA3LjgzMi4yNzYgMS4wNC4zNDcgMi4wOC41NTUgMy4xOS45Ny45MDEuMzQ2IDEuOTQxLjkgMi41NjUgMS42NjIuNDg1LjQ4NS43NjMgMS4xMDkgMS4wNCAxLjczMi4yNzcuNzYyLjM0NyAxLjU5My4zNDcgMi40MjQgMCAuNDg1LS4wNy45Ny0uMTM5IDEuNDU1LS4yNzcuOTctLjYyNCAxLjgtMS4zMTcgMi42MzItMS45NDIgMi4yMTYtNC43ODQgMy4wNDgtNy42MjcgMy4wNDgtMS41MjUgMC0zLjE5LS4xMzktNC42NDUtLjYyNGwtMS44NzItLjYyM2MuMDY5LS44MzEuMjA4LTEuNjYzLjQxNi0yLjU2My4yMDgtLjgzMS41NTQtMS44Ljk3LTIuNTYzYTMyLjQ4IDMyLjQ4IDAgMDAyLjc3NC45YzEuMzg2LjM0NyAzLjMyOC4zNDcgNC4yMy0uMTM4LjU1NC0uMjc3LjktLjYyMy45LTEuMTc3IDAtLjk3LS44MzItMS4xNzgtMS42NjQtMS4zODYtMS40NTYtLjU1NC0yLjk4LS45LTQuMzY4LTEuNTkzeiIgY2xhc3M9ImFzdDEiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZmlsbD0iI2E2MTkzYyIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2Utd2lkdGg9Ii42OTMiLz48cGF0aCBpZD0iYXBhdGgyNDUiIGQ9Ik0yMzYuNTUgNzUuMTUyaDMuNjc0Yy4xMzkuODMuMjc3IDEuNjYyLjI3NyAyLjQ5MyAwIC45LS4xMzggMS43MzItLjI3NyAyLjYzMmgtMy42NzV2Ny4xMzRjMCAuNTU0IDAgMS4xMDguMTM5IDEuNjYzLjQ4NSAxLjEwOC45MDEgMS40NTQgMi4xNSAxLjQ1NC44MzEgMCAxLjY2My0uMjA4IDIuNDI2LS4zNDYuMjc3LjkuNjI0IDEuOC42MjQgMi43Ny4xMzkuNzYyIDAgMS41OTMtLjA3IDIuMzU1bC0uMzQ2LjA3Yy0uNjI0LjEzOC0xLjE3OS4yNzctMS44MDMuMjc3LTIuNDI2LjM0Ni01LjU0Ni4xMzgtNy40ODgtMS42NjMtMS4zMTctMS4xNzctMi4wMS0zLjA0Ny0yLjAxLTUuNTRsLS4wNy0xOS4zOTVjMS4wNC0uMjA4IDIuMDgtLjI3NyAzLjEyLS4yNzcgMS4xMSAwIDIuMjIuMDcgMy4yNi4yNzd2Ni4wOTZ6IiBjbGFzcz0iYXN0MSIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjYTYxOTNjIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS13aWR0aD0iLjY5MyIvPjxwYXRoIGlkPSJhcGF0aDI0NyIgZD0iTTE1OS41OSA3NS4xNTJjLjI3Ny42MjMuNDE1IDEuMzg1LjU1NCAyLjA3N2wuMjc3LS4yNzdjLjc2My0uNzYyIDEuNTk1LTEuNTIzIDIuNjM1LTEuOCAxLjMxNy0uNDE2IDIuNDk2LS40MTYgMy44ODMgMCAuMTM4Ljc2MS4yMDggMS41MjMuMjA4IDIuMjg1IDAgMS4xNzgtLjA3IDIuMjg2LS40MTYgMy4zOTQtMS4wNC0uMjA4LTIuMjg4LS4yMDgtMy4yNTktLjA3LS43NjMuMTQtMS4zODcuNjI0LTEuODAzIDEuMTc4LS43NjIgMS4xNzgtLjkgMi40OTQtLjkgMy44OHY5LjU1OGMtMS4wNC4yMDctMi4xNS4yNzctMy4xOS4yNzctMS4xMSAwLTIuMTUtLjEzOS0zLjI1OS0uMjc3Vjc1LjI5YzEuODAzLS40MTYgNC4wMjEtLjQ4NSA1LjI3LS4xMzh6IiBjbGFzcz0iYXN0MSIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjYTYxOTNjIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS13aWR0aD0iLjY5MyIvPjxwYXRoIGlkPSJhcGF0aDI0OSIgZD0iTTExMS45NTcgNjcuMzI1Yy45MDIgMCAxLjgwMy4wNjkgMi42MzUuMjc3bDkuNTY4IDE1Ljc5MlY2Ny42MDJjMS4wNC0uMTM5IDIuMDgtLjI3NyAzLjEyLS4yNzcuOTcgMCAxLjg3Mi4xMzggMi43NzMuMjc3djI3Ljg0NGMtLjkuMjA4LTEuODAyLjM0Ni0yLjc3My4zNDYtLjkwMSAwLTEuNzMzLS4xMzgtMi42MzUtLjI3N2wtOS43MDYtMTUuNzIzdjE1LjY1NGMtLjk3LjIwOC0xLjk0Mi4zNDYtMi45ODIuMzQ2LS45NyAwLTEuOTQtLjEzOC0yLjkxMi0uMzQ2VjY3LjY3YzEuMDQtLjIwOCAxLjk0Mi0uMzQ2IDIuOTEyLS4zNDZ6IiBjbGFzcz0iYXN0MSIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjYTYxOTNjIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS13aWR0aD0iLjY5MyIvPjxwYXRoIGlkPSJhcGF0aDI1MSIgZD0iTTI1My42NzUgNTcuMDA0YzEuMTc4IDAgMi43MDQtLjQ4NSAzLjQ2Ni0xLjY2Mi43NjMtMS4xMDggMS4xOC0yLjc3IDEuMTgtNC45MTggMC0yLjE0Ny0uNDE3LTMuODc5LTEuMTgtNC45ODctLjc2Mi0xLjEwOC0xLjg3Mi0xLjU5My0zLjQ2Ni0xLjU5My0xLjUyNiAwLTIuODQzLjc2Mi0zLjM5OCAxLjU5My0uOTcgMS40NTUtMS4xMDkgMy4yNTYtMS4xMDkgNC45ODcgMCAxLjczMi4xMzkgMy40NjMgMS4xMSA0LjkxOC43NjIgMS4xNzcgMi4wOCAxLjY2MiAzLjM5NyAxLjY2MnptMCA0LjA4N2MtMS40NTYgMC0yLjkxMi0uMjc3LTQuMjMtLjgzMS0xLjE3OC0uNDg1LTIuMjE4LTEuMzE2LTMuMDUtMi4yODYtLjgzMi0uOTctMS4zODctMi4yMTYtMS44MDMtMy4zOTQtLjQxNi0xLjMxNi0uNTU1LTIuNzctLjU1NS00LjA4NiAwLTEuMzg2LjEzOS0yLjg0LjU1NS00LjE1Ni4zNDctMS4xNzguOTctMi40OTQgMS44MDMtMy4zOTQuOTAxLS45NyAxLjgwMi0xLjgwMSAzLjA1LTIuMzU1YTEwLjk2MyAxMC45NjMgMCAwMTQuMjMtLjgzMWMxLjQ1NiAwIDIuOTEyLjI3NyA0LjIyOS44MyAyLjQyNyAxLjEwOSA0LjAyMSAzLjE4NyA0Ljg1MyA1Ljc1LjQxNiAxLjM4NS41NTUgMi43Ny41NTUgNC4xNTUgMCAuNzYyLS4wNyAxLjUyNC0uMTM5IDIuMjE3LS4xMzggMS4yNDctLjU1NCAyLjYzMi0xLjE3OCAzLjc0YTguMDQzIDguMDQzIDAgMDEtMi40MjcgMi44NGMtMS4xMS43NjItMi4zNTcgMS4zODUtMy42NzUgMS41OTMtLjY5My4xMzktMS4zODYuMjA4LTIuMjE4LjIwOHoiIGNsYXNzPSJhc3QxIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGw9IiNhNjE5M2MiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLXdpZHRoPSIuNjkzIi8+PHBhdGggaWQ9ImFwYXRoMjUzIiBkPSJNMjM1LjUxIDQ0LjMyOWMtLjYyNS0uMjA4LTEuMzg3LS4zNDYtMi4wOC0uNDE2LTEuNTk1LS4xMzgtMy4xMi4wNy00LjM2OSAxLjEwOS0uOTcuNzYyLTEuNDU2IDEuNzMxLTEuNzMzIDIuOTA5LS4yNzcuOS0uMzQ3IDEuODctLjM0NyAyLjg0IDAgMS41OTMuMzQ3IDMuNjAxIDEuNTk1IDQuNzEgMS4xMSAxLjAzOCAyLjcwNCAxLjM4NSA0LjE2IDEuMzg1LjIwOCAwIDEuODAzLS4wNyAyLjc3My0uMjc3em0yLjQyNi0xMi43NDVjLjgzMiAwIDEuNTk1LjEzOSAyLjM1Ny4yNzd2MjguMTIyYy0yLjIxOC42OTItMy42NzQuOS01LjYxNiAxLjAzOS0xLjM4Ni4wNjktMi44NDIuMTM4LTQuMjI5LS4wNy0xLjk0MS0uMjc3LTMuODgzLS45LTUuNDA4LTIuMjE2LTEuMDQtLjktMS44MDMtMi4wMDktMi4zNTctMy4yNTUtLjYyNC0xLjUyNC0uODMyLTMuMTE3LS44MzItNC43MSAwLTEuNTI0LjIwOC0zLjA0OC43NjItNC41MDNhMTEuMzE4IDExLjMxOCAwIDAxMi4wOC0zLjUzMmMuOTAyLS45NyAyLjAxMS0xLjczMiAzLjI2LTIuMjg2IDEuMzg2LS41NTQgMi43NzItLjc2MiA0LjIyOC0uODMxLjM0NyAwIDIuMDguMDcgMy4yNi4zNDZ2LTguMTA0Yy44MzEtLjEzOCAxLjY2My0uMjc3IDIuNDk1LS4yNzd6IiBjbGFzcz0iYXN0MSIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjYTYxOTNjIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS13aWR0aD0iLjY5MyIvPjwvc3ZnPg==" alt="Banco do Nordeste" width="276" height="128">
+<div>
+<h1>Listagem de Cartões</h1>
+<p>Preencha os dados, adicione os clientes e imprima o termo.</p>
+</div></div></header>
+
+<main class="no-print">
+<section class="card">
+<h2>1. Dados do documento</h2>
+<div class="grid">
+<label>Agência
+<input id="agency" maxlength="70" value="093-Caxias">
+</label>
+<label>Cidade / UF
+<input id="city" maxlength="70" value="Caxias(MA)">
+</label>
+<label>Data do documento
+<input id="date" type="date">
+</label>
+<label>Recebido em — opcional
+<input id="received" type="date">
+</label>
+<label class="full">Responsável / matrícula — primeira linha
+<input id="person1" maxlength="95" value="LEONARDO DANIEL DA CUNHA F145297">
+</label>
+<label class="full">Responsável / matrícula — segunda linha
+<input id="person2" maxlength="95" value="MARTA MARIA RAMALHO BEZERRA DUARTE A204133">
+</label>
+<label class="full">Texto do termo
+<textarea id="term" maxlength="420">Confirmo a transferência da guarda dos Cartões de Débito de clientes do Crediamigo, conforme Lista de Cartões/Planilha em anexo, conferida e rubricada nesta data.</textarea>
+</label>
+</div>
+</section>
+
+<section class="card">
+<h2>2. Adicionar cliente</h2>
+<form id="clientForm">
+<div class="grid">
+<label>Número da conta
+<input id="account" placeholder="Ex.: 6047-6" maxlength="25" required autocomplete="off">
+</label>
+<label>Nome do cliente
+<input id="clientName" placeholder="Nome do cliente" maxlength="100" required autocomplete="off">
+</label>
+<label>Tipo de cartão
+<select id="cardType" required>
+<option value="CREDIAMIGO">CREDIAMIGO</option>
+<option value="AGROAMIGO">AGROAMIGO</option>
+<option value="PJ">PJ</option>
+<option value="PF">PF</option>
+<option value="INSS">INSS</option>
+<option value="PRONAF">PRONAF</option>
+</select>
+</label>
+</div>
+<div class="actions">
+<button id="submitClient" type="submit">+ Adicionar à lista</button>
+<button id="cancelEdit" class="secondary" type="button" hidden>Cancelar edição</button>
+</div>
+</form>
+<p id="message" class="muted" role="status"></p>
+</section>
+
+<section class="card">
+<h2>3. Cartões encaminhados <span id="count" class="count">0</span></h2>
+<div class="scroll">
+<table>
+<thead><tr><th>Conta</th><th>Cliente</th><th>Tipo de cartão</th><th>Ações</th></tr></thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+<div class="actions">
+<button id="previewButton" class="secondary">Visualizar documento</button>
+<button id="printButton">Imprimir / Salvar PDF</button>
+<button id="clearButton" class="danger">Limpar lista</button>
+</div>
+<p class="muted">Na impressão, selecione A4, escala 100% e desative os cabeçalhos e rodapés do navegador. Para gerar um arquivo, escolha “Salvar como PDF”.</p>
+<p class="muted" id="status" role="status"></p>
+</section>
+<section class="card">
+<h2>4. Histórico de relatórios</h2>
+<p class="muted">Uma cópia é salva automaticamente no histórico ao visualizar, imprimir / gerar PDF ou limpar a lista. O histórico fica neste dispositivo e navegador para consultas posteriores, mesmo ao limpar a lista de clientes.</p>
+<button id="saveReportButton" type="button">Salvar relatório no histórico</button>
+<p id="historyMessage" class="muted" role="status"></p>
+<div class="scroll"><table>
+<thead><tr><th>Salvo em</th><th>Data do documento</th><th>Agência</th><th>Cartões</th><th>Ações</th></tr></thead>
+<tbody id="reportHistory"></tbody>
+</table></div>
+</section>
+</main>
+<div id="preview" aria-label="Prévia do documento"></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const key='credimigo-listagem-v1';
+const cardTypes=['CREDIAMIGO','AGROAMIGO','PJ','PF','INSS','PRONAF'];
+function normalizeCardType(value){
+  const normalized=typeof value==='string'?value.trim().toLocaleUpperCase('pt-BR'):'';
+  if(normalized==='AGRL')return 'AGROAMIGO';
+  if(normalized==='PESSOA FÍSICA'||normalized==='PESSOA FISICA')return 'PF';
+  if(normalized==='PESSOA JURÍDICA'||normalized==='PESSOA JURIDICA')return 'PJ';
+  return cardTypes.includes(normalized)?normalized:'CREDIAMIGO';
+}
+const fields=['agency','city','date','received','person1','person2','term'];
+let clients=[],editing=-1,reports=[],activeReport=null;
+const now=new Date();
+$('date').value=[
+  now.getFullYear(),
+  String(now.getMonth()+1).padStart(2,'0'),
+  String(now.getDate()).padStart(2,'0')
+].join('-');
+
+function element(tag,text,className){
+  const el=document.createElement(tag);
+  if(text!==undefined)el.textContent=text;
+  if(className)el.className=className;
+  return el;
+}
+function save(){
+  try{
+    const data={clients,reports,fields:{},draft:{
+      account:$('account').value,
+      name:$('clientName').value,
+      cardType:$('cardType').value,
+      editing
+    }};
+    fields.forEach(id=>data.fields[id]=$(id).value);
+    localStorage.setItem(key,JSON.stringify(data));
+    $('status').textContent='Dados salvos automaticamente neste dispositivo, neste navegador. Nenhum dado é enviado a um servidor.';
+    return true;
+  }catch{
+    $('status').textContent='O navegador não permitiu salvar o rascunho. Mantenha esta página aberta até imprimir.';
+    return false;
+  }
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    if(Array.isArray(data.reports))reports=data.reports.filter(report=>
+      report&&typeof report.savedAt==='string'&&Number.isFinite(Date.parse(report.savedAt))&&
+      report.fields&&fields.every(id=>typeof report.fields[id]==='string')&&
+      Array.isArray(report.clients)&&report.clients.every(c=>c&&typeof c.account==='string'&&typeof c.name==='string')
+    ).map(report=>({...report,clients:report.clients.map(c=>({...c,cardType:normalizeCardType(c.cardType)}))}));
+    if(Array.isArray(data.clients)){
+      clients=data.clients.filter(c=>c&&typeof c.account==='string'&&typeof c.name==='string')
+        .map(c=>({account:c.account.slice(0,25),name:c.name.slice(0,100).toLocaleUpperCase('pt-BR'),cardType:normalizeCardType(c.cardType)}));
+    }
+    fields.forEach(id=>{
+      if(typeof data.fields?.[id]==='string')$(id).value=data.fields[id];
+    });
+    if(data.draft&&typeof data.draft==='object'){
+      if(typeof data.draft.account==='string')$('account').value=data.draft.account.slice(0,25);
+      if(typeof data.draft.name==='string')$('clientName').value=data.draft.name.slice(0,100).toLocaleUpperCase('pt-BR');
+      $('cardType').value=normalizeCardType(data.draft.cardType);
+      const index=data.draft.editing;
+      // Só restaura a edição se a lista original permaneceu válida e na mesma ordem.
+      if(Number.isInteger(index)&&index>=0&&index<clients.length&&clients.length===data.clients.length){
+        editing=index;
+        $('submitClient').textContent='Salvar alteração';
+        $('cancelEdit').hidden=false;
+      }
+    }
+    $('status').textContent='Rascunho recuperado deste navegador.';
+  }catch{
+    $('status').textContent='Não foi possível recuperar o rascunho anterior.';
+  }
+}
+function resetForm(){
+  editing=-1;
+  $('clientForm').reset();
+  $('submitClient').textContent='+ Adicionar à lista';
+  $('cancelEdit').hidden=true;
+}
+function render(){
+  activeReport=null;
+  $('list').replaceChildren();
+  $('count').textContent=clients.length;
+  if(!clients.length){
+    const row=element('tr');
+    const cell=element('td','Nenhum cartão adicionado.','empty');
+    cell.colSpan=4;row.append(cell);$('list').append(row);
+  }
+  clients.forEach((client,index)=>{
+    const row=element('tr');
+    row.append(element('td',client.account),element('td',client.name),element('td',client.cardType));
+    const actions=element('td');
+    const edit=element('button','Editar','secondary small');
+    edit.type='button';
+    edit.setAttribute('aria-label','Editar '+client.name);
+    edit.onclick=()=>{
+      editing=index;
+      $('account').value=client.account;
+      $('clientName').value=client.name;
+      $('cardType').value=normalizeCardType(client.cardType);
+      $('submitClient').textContent='Salvar alteração';
+      $('cancelEdit').hidden=false;
+      save();
+      $('account').focus();
+      $('clientForm').scrollIntoView({behavior:'smooth',block:'center'});
+    };
+    const remove=element('button','Excluir','danger small');
+    remove.type='button';
+    remove.setAttribute('aria-label','Excluir '+client.name);
+    remove.onclick=()=>{
+      if(!confirm('Excluir '+client.name+' da lista?'))return;
+      clients.splice(index,1);resetForm();save();render();
+    };
+    actions.append(edit,remove);row.append(actions);$('list').append(row);
+  });
+  buildDocument();
+}
+$('clientForm').addEventListener('submit',event=>{
+  event.preventDefault();
+  const account=$('account').value.trim();
+  const name=$('clientName').value.trim().toLocaleUpperCase('pt-BR');
+  if(!account||!name){
+    $('message').textContent='Informe a conta e o nome do cliente.';
+    return;
+  }
+  if(clients.some((c,i)=>i!==editing&&c.account===account)){
+    $('message').textContent='Essa conta já está na lista. Use Editar para alterar os dados.';
+    return;
+  }
+  const cardType=normalizeCardType($('cardType').value);
+  const wasEditing=editing>=0;
+  if(wasEditing)clients[editing]={account,name,cardType};
+  else clients.push({account,name,cardType});
+  resetForm();save();render();
+  $('message').textContent=wasEditing?'Registro atualizado.':'Cliente adicionado à lista.';
+  $('account').focus();
+});
+$('cancelEdit').onclick=()=>{resetForm();save();$('message').textContent='Edição cancelada.'};
+fields.forEach(id=>$(id).addEventListener('input',()=>{activeReport=null;save();buildDocument()}));
+$('account').addEventListener('input',save);
+$('cardType').addEventListener('change',save);
+$('clientName').addEventListener('input',()=>{
+  const input=$('clientName');
+  const start=input.selectionStart,end=input.selectionEnd;
+  const value=input.value;
+  input.value=value.toLocaleUpperCase('pt-BR');
+  input.setSelectionRange(
+    value.slice(0,start).toLocaleUpperCase('pt-BR').length,
+    value.slice(0,end).toLocaleUpperCase('pt-BR').length
+  );
+  save();
+});
+
+function dateText(value,long=false){
+  if(!value)return long?'____ de ______________ de ______':'____/____/________';
+  const parts=value.split('-').map(Number);
+  if(parts.length!==3||!parts.every(Number.isFinite))return '____/____/________';
+  const [year,month,day]=parts;
+  if(!long)return String(day).padStart(2,'0')+'/'+String(month).padStart(2,'0')+'/'+year;
+  const months=['janeiro','fevereiro','março','abril','maio','junho',
+    'julho','agosto','setembro','outubro','novembro','dezembro'];
+  return day+' de '+months[month-1]+' de '+year;
+}
+function buildDocument(){
+  const documentClients=activeReport?activeReport.clients:clients;
+  const fieldValue=id=>activeReport?activeReport.fields[id]:$(id).value;
+  $('preview').replaceChildren();
+  // Ordenação numérica antes da paginação, preservando a lista usada na edição.
+  const sortedClients=[...documentClients].sort((a,b)=>
+    a.account.localeCompare(b.account,'pt-BR',{numeric:true})
+  );
+  // Limite conservador para permitir nomes longos e repetir o termo em cada folha.
+  const perPage=16;
+  const pageCount=Math.max(1,Math.ceil(documentClients.length/perPage));
+  for(let page=0;page<pageCount;page++){
+    const sheet=element('article',undefined,'sheet');
+    sheet.append(element('p',fieldValue('term'),'term'));
+    const details=element('div',undefined,'details');
+    details.append(element('div','Agência '+fieldValue('agency')));
+    if(fieldValue('person1'))details.append(element('div',fieldValue('person1')));
+    if(fieldValue('person2'))details.append(element('div',fieldValue('person2')));
+    details.append(element('div',fieldValue('city')+', '+dateText(fieldValue('date'),true)));
+    sheet.append(details);
+    sheet.append(element('div','Recebido em: '+dateText(fieldValue('received')),'received'));
+    const signatures=element('div',undefined,'signatures');
+    signatures.append(element('div','Remetente'),element('div','Destinatário'));
+    sheet.append(signatures);
+    sheet.append(element('h3','LISTA DE CARTÕES ENCAMINHADOS'));
+    const table=element('table');
+    const head=element('thead');
+    const header=element('tr');
+    header.append(element('th','Número da conta'),element('th','Nome do cliente'),element('th','Tipo de cartão'));
+    head.append(header);
+    const body=element('tbody');
+    const subset=sortedClients.slice(page*perPage,(page+1)*perPage);
+    subset.forEach(client=>{
+      const row=element('tr');
+      row.append(element('td',client.account),element('td',client.name),element('td',client.cardType));
+      body.append(row);
+    });
+    table.append(head,body);sheet.append(table);
+    const total=pageCount===1
+      ?'Quantitativo de cartões encaminhados: '+documentClients.length+'.'
+      :'Cartões nesta página: '+subset.length+
+       '. Quantitativo total de cartões encaminhados: '+documentClients.length+'.';
+    sheet.append(element('div',total,'total'));
+    sheet.append(element('div','PÁGINA '+(page+1)+' DE '+pageCount,'footer'));
+    $('preview').append(sheet);
+  }
+}
+$('previewButton').onclick=()=>{
+  if(clients.length&&(activeReport||!document.body.classList.contains('show-preview'))&&!archiveCurrentReport())return;
+  if(activeReport){
+    activeReport=null;buildDocument();
+    document.body.classList.remove('show-preview');
+  }
+  document.body.classList.toggle('show-preview');
+  const visible=document.body.classList.contains('show-preview');
+  $('previewButton').textContent=visible?'Ocultar documento':'Visualizar documento';
+  if(visible)$('preview').scrollIntoView({behavior:'smooth'});
+};
+$('printButton').onclick=()=>{
+  if(editing>=0){
+    alert('Salve ou cancele a edição do cliente antes de imprimir.');
+    return;
+  }
+  if(!clients.length){
+    alert('Adicione pelo menos um cliente antes de imprimir.');
+    return;
+  }
+  if(!$('date').value||!$('agency').value.trim()||!$('city').value.trim()){
+    alert('Preencha agência, cidade e data do documento.');
+    return;
+  }
+  if(!archiveCurrentReport())return;
+  activeReport=null;buildDocument();window.print();
+};
+$('clearButton').onclick=()=>{
+  if(!clients.length)return;
+  if(confirm('Excluir todos os clientes desta lista? Os dados da agência serão mantidos.')){
+    if(!archiveCurrentReport())return;
+    clients=[];resetForm();save();render();
+    $('message').textContent='Lista limpa. Você pode iniciar uma nova listagem.';
+  }
+};
+function renderHistory(){
+  $('reportHistory').replaceChildren();
+  if(!reports.length){
+    const row=element('tr');
+    const cell=element('td','Nenhum relatório salvo.','empty');
+    cell.colSpan=5;row.append(cell);$('reportHistory').append(row);
+  }
+  reports.forEach(report=>{
+    const row=element('tr');
+    row.append(element('td',new Date(report.savedAt).toLocaleString('pt-BR')),
+      element('td',dateText(report.fields.date)),element('td',report.fields.agency),
+      element('td',String(report.clients.length)));
+    const actions=element('td');
+    const view=element('button','Visualizar','secondary small');
+    view.type='button';
+    view.onclick=()=>{
+      activeReport=report;buildDocument();
+      document.body.classList.add('show-preview');
+      $('previewButton').textContent='Visualizar documento atual';
+      $('historyMessage').textContent='Visualizando relatório salvo em '+new Date(report.savedAt).toLocaleString('pt-BR')+'.';
+      $('preview').scrollIntoView({behavior:'smooth'});
+    };
+    const print=element('button','Imprimir / PDF','secondary small');
+    print.type='button';
+    print.onclick=()=>{activeReport=report;buildDocument();window.print()};
+    actions.append(view,print);row.append(actions);$('reportHistory').append(row);
+  });
+}
+$('saveReportButton').onclick=()=>{
+  if(editing>=0){
+    $('historyMessage').textContent='Salve ou cancele a edição do cliente antes de guardar o relatório.';
+    return;
+  }
+  if(!clients.length||!$('date').value||!$('agency').value.trim()||!$('city').value.trim()){
+    $('historyMessage').textContent='Adicione um cliente e preencha agência, cidade e data antes de salvar o relatório.';
+    return;
+  }
+  archiveCurrentReport();
+};
+function archiveCurrentReport(){
+  if(!clients.length)return true;
+  const report={savedAt:new Date().toISOString(),fields:{},clients:clients.map(c=>({...c}))};
+  fields.forEach(id=>report.fields[id]=$(id).value);
+  const previous=reports[0];
+  const duplicate=previous&&JSON.stringify(previous.fields)===JSON.stringify(report.fields)&&
+    JSON.stringify(previous.clients)===JSON.stringify(report.clients);
+  if(!duplicate)reports.unshift(report);
+  if(!save()){
+    if(!duplicate)reports.shift();
+    const message='Ação interrompida: não foi possível salvar o histórico no dispositivo. Verifique o espaço e as permissões do navegador e tente novamente.';
+    $('historyMessage').textContent=message;
+    alert(message);
+    return false;
+  }
+  renderHistory();
+  $('historyMessage').textContent='Relatório salvo no histórico. Alterações na lista não modificam esta cópia.';
+  return true;
+}
+window.addEventListener('beforeprint',()=>{
+  // Também registra impressões iniciadas pelo menu ou atalho do navegador.
+  if(!activeReport&&!archiveCurrentReport()){
+    $('preview').replaceChildren();
+    $('preview').append(element('p','Impressão indisponível: não foi possível salvar o relatório no histórico.'));
+    return;
+  }
+  buildDocument();
+});
+window.addEventListener('afterprint',buildDocument);
+load();render();renderHistory();
+</script>
+</body>
+</html>
