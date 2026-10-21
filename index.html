@@ -131,6 +131,8 @@ tr{break-inside:avoid}
 <label>Tipo de cartão
 <select id="cardType" required>
 <option value="AGROAMIGO" selected>AGROAMIGO</option>
+<option value="CONTA-CORRENTE">CONTA-CORRENTE</option>
+<option value="POUPANÇA">POUPANÇA</option>
 <option value="CREDIAMIGO">CREDIAMIGO</option>
 <option value="INSS">INSS</option>
 <option value="PF">PF</option>
@@ -184,7 +186,7 @@ tr{break-inside:avoid}
 'use strict';
 const $=id=>document.getElementById(id);
 const key='credimigo-listagem-v1';
-const cardTypes=['AGROAMIGO','CREDIAMIGO','INSS','PF','PJ','PRONAF'];
+const cardTypes=['AGROAMIGO','CONTA-CORRENTE','POUPANÇA','CREDIAMIGO','INSS','PF','PJ','PRONAF'];
 function normalizeCardType(value){
   const normalized=typeof value==='string'?value.trim().toLocaleUpperCase('pt-BR'):'';
   if(normalized==='AGRL')return 'AGROAMIGO';
