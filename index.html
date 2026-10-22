@@ -104,12 +104,12 @@ tr{break-inside:avoid}
 <input id="received" type="date">
 </label>
 <label class="full">Responsável / matrícula — primeira linha
-<input id="person1" maxlength="95" value="LEONARDO DANIEL DA CUNHA F145297">
+<input id="person1" maxlength="95" value="LEONARDO DANIEL DA CUNHA - F145297">
 </label>
 <label class="full">Responsável / matrícula — segunda linha
 <select id="person2">
-<option value="ALACIDE SANTOS COSTA" selected>ALACIDE SANTOS COSTA</option>
-<option value="MARTA MARIA RAMALHO BEZERRA DUARTE A204133">MARTA MARIA RAMALHO BEZERRA DUARTE A204133</option>
+<option value="ALACIDE SANTOS COSTA" selected>ALACIDE SANTOS COSTA - F168998</option>
+<option value="MARTA MARIA RAMALHO BEZERRA DUARTE A204133">MARTA MARIA RAMALHO BEZERRA DUARTE - A204133</option>
 </select>
 </label>
 <label class="full">Texto do termo
@@ -124,6 +124,7 @@ tr{break-inside:avoid}
 <div class="grid">
 <label>Número da conta
 <input id="account" placeholder="Ex.: 6047-6" maxlength="25" required autocomplete="off">
+<small id="accountHint" class="muted">Obrigatório, exceto para cartões INSS.</small>
 </label>
 <label>Nome do cliente
 <input id="clientName" placeholder="Nome do cliente" maxlength="100" required autocomplete="off">
@@ -269,9 +270,15 @@ function load(){
     $('status').textContent='Não foi possível recuperar o rascunho anterior.';
   }
 }
+function updateAccountRequirement(){
+  const isINSS=normalizeCardType($('cardType').value)==='INSS';
+  $('account').required=!isINSS;
+  $('accountHint').textContent=isINSS?'Opcional para cartões INSS.':'Obrigatório para este tipo de cartão.';
+}
 function resetForm(){
   editing=-1;
   $('clientForm').reset();
+  updateAccountRequirement();
   $('submitClient').textContent='+ Adicionar à lista';
   $('cancelEdit').hidden=true;
 }
@@ -296,6 +303,7 @@ function render(){
       $('account').value=client.account;
       $('clientName').value=client.name;
       $('cardType').value=normalizeCardType(client.cardType);
+      updateAccountRequirement();
       $('submitClient').textContent='Salvar alteração';
       $('cancelEdit').hidden=false;
       save();
@@ -317,15 +325,15 @@ $('clientForm').addEventListener('submit',event=>{
   event.preventDefault();
   const account=$('account').value.trim();
   const name=$('clientName').value.trim().toLocaleUpperCase('pt-BR');
-  if(!account||!name){
-    $('message').textContent='Informe a conta e o nome do cliente.';
+  const cardType=normalizeCardType($('cardType').value);
+  if(!name||(cardType!=='INSS'&&!account)){
+    $('message').textContent=cardType==='INSS'?'Informe o nome do cliente.':'Informe a conta e o nome do cliente.';
     return;
   }
-  if(clients.some((c,i)=>i!==editing&&c.account===account)){
+  if(account&&clients.some((c,i)=>i!==editing&&c.account===account)){
     $('message').textContent='Essa conta já está na lista. Use Editar para alterar os dados.';
     return;
   }
-  const cardType=normalizeCardType($('cardType').value);
   const wasEditing=editing>=0;
   if(wasEditing)clients[editing]={account,name,cardType};
   else clients.push({account,name,cardType});
@@ -336,7 +344,7 @@ $('clientForm').addEventListener('submit',event=>{
 $('cancelEdit').onclick=()=>{resetForm();save();$('message').textContent='Edição cancelada.'};
 fields.forEach(id=>$(id).addEventListener('input',()=>{activeReport=null;save();buildDocument()}));
 $('account').addEventListener('input',save);
-$('cardType').addEventListener('change',save);
+$('cardType').addEventListener('change',()=>{updateAccountRequirement();save()});
 $('clientName').addEventListener('input',()=>{
   const input=$('clientName');
   const start=input.selectionStart,end=input.selectionEnd;
@@ -509,7 +517,7 @@ window.addEventListener('beforeprint',()=>{
   buildDocument();
 });
 window.addEventListener('afterprint',buildDocument);
-load();render();renderHistory();
+load();updateAccountRequirement();render();renderHistory();
 </script>
 </body>
 </html>
