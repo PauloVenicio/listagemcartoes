@@ -108,8 +108,8 @@ tr{break-inside:avoid}
 </label>
 <label class="full">Responsável / matrícula — segunda linha
 <select id="person2">
-<option value="ALACIDE SANTOS COSTA" selected>ALACIDE SANTOS COSTA - F168998</option>
-<option value="MARTA MARIA RAMALHO BEZERRA DUARTE A204133">MARTA MARIA RAMALHO BEZERRA DUARTE - A204133</option>
+<option value="ALACIDE SANTOS COSTA - F168998" selected>ALACIDE SANTOS COSTA - F168998</option>
+<option value="MARTA MARIA RAMALHO BEZERRA DUARTE - A204133">MARTA MARIA RAMALHO BEZERRA DUARTE - A204133</option>
 </select>
 </label>
 <label class="full">Texto do termo
@@ -195,6 +195,11 @@ function normalizeCardType(value){
   if(normalized==='PESSOA JURÍDICA'||normalized==='PESSOA JURIDICA')return 'PJ';
   return cardTypes.includes(normalized)?normalized:'CREDIAMIGO';
 }
+function normalizeResponsible(value){
+  if(value==='ALACIDE SANTOS COSTA')return 'ALACIDE SANTOS COSTA - F168998';
+  if(value==='MARTA MARIA RAMALHO BEZERRA DUARTE A204133')return 'MARTA MARIA RAMALHO BEZERRA DUARTE - A204133';
+  return value;
+}
 const fields=['agency','city','date','received','person1','person2','term'];
 let clients=[],editing=-1,reports=[],activeReport=null;
 const now=new Date();
@@ -236,14 +241,14 @@ function load(){
       report&&typeof report.savedAt==='string'&&Number.isFinite(Date.parse(report.savedAt))&&
       report.fields&&fields.every(id=>typeof report.fields[id]==='string')&&
       Array.isArray(report.clients)&&report.clients.every(c=>c&&typeof c.account==='string'&&typeof c.name==='string')
-    ).map(report=>({...report,clients:report.clients.map(c=>({...c,cardType:normalizeCardType(c.cardType)}))}));
+    ).map(report=>({...report,fields:{...report.fields,person2:normalizeResponsible(report.fields.person2)},clients:report.clients.map(c=>({...c,cardType:normalizeCardType(c.cardType)}))}));
     if(Array.isArray(data.clients)){
       clients=data.clients.filter(c=>c&&typeof c.account==='string'&&typeof c.name==='string')
         .map(c=>({account:c.account.slice(0,25),name:c.name.slice(0,100).toLocaleUpperCase('pt-BR'),cardType:normalizeCardType(c.cardType)}));
     }
     fields.forEach(id=>{
       if(typeof data.fields?.[id]==='string'){
-        const value=data.fields[id];
+        const value=id==='person2'?normalizeResponsible(data.fields[id]):data.fields[id];
         // Preserva responsáveis de rascunhos anteriores, inclusive a segunda linha vazia.
         if(id==='person2'&&![...$(id).options].some(option=>option.value===value)){
           const option=element('option',value||'Sem segundo responsável');
