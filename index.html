@@ -46,9 +46,10 @@ body.show-preview #preview{display:block}
 .sheet{position:relative;background:white;color:#111;width:210mm;min-height:297mm;padding:12mm 10mm 20mm;margin:0 auto 20px;box-shadow:0 3px 15px #0002;font-family:Arial,sans-serif}
 .term{font-family:Georgia,serif;font-size:12pt;font-weight:bold;line-height:1.45;margin:0 0 15mm;white-space:pre-wrap;overflow-wrap:anywhere}
 .details{font-size:11pt;line-height:1.7}
-.responsibles{display:flex;align-items:baseline;justify-content:space-between;gap:8mm;flex-wrap:wrap;margin:1mm 0}
-.responsibles .responsible-right{margin-left:auto;text-align:right}
-.received{text-align:right;margin-top:3mm;margin-right:15mm;font-size:11pt}
+/* A segunda assinatura e a data de recebimento começam na mesma coluna. */
+.responsibles{display:grid;grid-template-columns:minmax(0,1fr) 80mm;column-gap:5mm;align-items:start;margin:1mm 0}
+.responsibles .responsible-right{grid-column:2;text-align:left;overflow-wrap:anywhere}
+.received{width:80mm;margin:3mm 0 0 auto;text-align:left;font-size:11pt}
 .signatures{display:flex;justify-content:space-between;gap:25mm;margin:28mm 0 7mm;text-align:center;font-size:11pt}
 .signatures div{width:42%;border-top:1px solid #999;padding-top:2mm}
 .sheet h3{text-align:center;font-size:12pt;margin:0 0 2mm}
